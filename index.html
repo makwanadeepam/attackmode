@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weekly Focus Planner</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #b2222e 0, #4b0208 40%, #1a0003 100%);
+      background-repeat: no-repeat;
+      background-size: cover;
+      color: #111;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    /* Header */
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tabs {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px;
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-tab {
+      border: none;
+      background: transparent;
+      padding: 10px 26px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-tab.active {
+      background: #ff1f2f;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      outline: none;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.9);
+      transition: transform 0.08s ease, box-shadow 0.08s ease,
+        background 0.08s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      background: #ffffff;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    main {
+      width: 100%;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Layout */
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 20px;
+    }
+
+    .card-wide {
+      grid-column: 1 / -1;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .card-subtitle {
+      font-size: 16px;
+      color: #777;
+      margin-left: 4px;
+      font-weight: 500;
+    }
+
+    .edit-pill {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #f4f4f4;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    /* Day tabs */
+
+    .day-tabs {
+      display: inline-flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .day-tab {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .day-tab.active {
+      background: #111;
+      color: #fff;
+    }
+
+    /* Task list */
+
+    .task-list {
+      list-style: none;
+      margin-top: 10px;
+      margin-bottom: 16px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      gap: 8px;
+    }
+
+    .task-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 2px solid #ccc;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox.checked {
+      border-color: #ff1f2f;
+      background: #ff1f2f;
+      color: #fff;
+    }
+
+    .task-text {
+      font-size: 18px;
+      word-break: break-word;
+    }
+
+    .task-text.completed {
+      text-decoration: line-through;
+      color: #9a9a9a;
+    }
+
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .task-delete {
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      cursor: pointer;
+      color: #c42c2c;
+      padding: 4px 6px;
+      border-radius: 10px;
+    }
+
+    .task-delete:hover {
+      background: #ffe4e4;
+    }
+
+    .task-edit {
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      cursor: pointer;
+      color: #666;
+      padding: 4px 6px;
+      border-radius: 10px;
+    }
+
+    .task-edit:hover {
+      background: #f0f0f0;
+    }
+
+    .task-item[draggable="true"] {
+      cursor: grab;
+    }
+
+    .task-item.drag-over {
+      background: #f7f7f7;
+    }
+
+    .add-task-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .add-task-row input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      padding: 10px 16px;
+      font-size: 15px;
+      outline: none;
+      min-width: 0;
+    }
+
+    .add-task-row input:focus {
+      border-color: #ff1f2f;
+    }
+
+    .yesterday-btn {
+      margin-top: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #eee;
+      font-size: 13px;
+      background: #fafafa;
+      cursor: pointer;
+    }
+
+    .yesterday-btn:hover {
+      background: #f0f0f0;
+    }
+
+    /* Week card */
+
+    .week-top-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .week-name {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .week-progress-label {
+      font-size: 16px;
+      color: #777;
+    }
+
+    .week-progress-value {
+      font-size: 36px;
+      font-weight: 800;
+    }
+
+    .week-subheading {
+      font-size: 19px;
+      margin-bottom: 16px;
+    }
+
+    .week-stats {
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .week-tagline {
+      margin: 4px 0 14px;
+      font-size: 15px;
+      font-style: italic;
+      color: #555;
+    }
+
+    .week-chart-wrapper {
+      margin-top: 10px;
+    }
+
+    .week-chart-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #777;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bar-chart {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      height: 120px;
+      padding-bottom: 6px;
+      border-radius: 18px;
+      background: #f5f5f5;
+      padding: 12px 12px 8px;
+    }
+
+    .bar-column {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: #e0e0e0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-inner {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: #ff1f2f;
+      transition: height 0.25s ease;
+    }
+
+    .bar-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+      font-size: 10px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.completed {
+      background: #ff1f2f;
+    }
+
+    .legend-dot.pending {
+      background: #e4e4e4;
+    }
+
+    .week-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .week-nav button {
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      background: #fafafa;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .week-nav button:hover {
+      background: #f0f0f0;
+    }
+
+    .week-nav span {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* History */
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .history-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-week-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .history-stats {
+      font-size: 15px;
+    }
+
+    .history-bar-chart {
+      margin-top: 8px;
+    }
+
+    .small-bar-chart {
+      height: 80px;
+      padding: 8px 10px 6px;
+      border-radius: 18px;
+      background: #f5f5f5;
+      display: flex;
+      gap: 6px;
+      align-items: flex-end;
+    }
+
+    .small-bar-column {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+    }
+
+    .small-bar {
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: #e0e0e0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .small-bar-inner {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: #ff1f2f;
+      transition: height 0.2s ease;
+    }
+
+    .small-bar-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+    }
+
+    /* Scratch tasks (quick list) */
+
+    .scratch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scratch-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .scratch-subtitle {
+      font-size: 13px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .scratch-progress-summary {
+      text-align: right;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    #scratchProgressPercent {
+      font-size: 20px;
+      font-weight: 700;
+      display: block;
+    }
+
+    #scratchProgressText {
+      font-size: 13px;
+      color: #777;
+    }
+
+    .scratch-progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #f0f0f0;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .scratch-progress-inner {
+      height: 100%;
+      width: 0%;
+      background: #ff1f2f;
+      transition: width 0.2s ease;
+    }
+
+    .scratch-task-list .task-item {
+      border-bottom-color: #f0f0f0;
+    }
+
+    .scratch-textbox {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .scratch-meta {
+      font-size: 12px;
+      color: #777;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .scratch-meta span {
+      white-space: nowrap;
+    }
+
+    .scratch-add-row {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)) auto auto;
+      gap: 8px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .scratch-add-row input[type="text"] {
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .scratch-add-row input[type="time"] {
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .scratch-add-row input[type="text"]:focus,
+    .scratch-add-row input[type="time"]:focus {
+      border-color: #ff1f2f;
+    }
+
+    .scratch-alarm-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .scratch-alarm-label input {
+      cursor: pointer;
+    }
+
+    /* Mobile tweaks */
+
+    @media (max-width: 900px) {
+      body {
+        padding: 16px;
+        align-items: flex-start;
+      }
+
+      .home-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 18px 16px;
+      }
+
+      .card-title {
+        font-size: 26px;
+      }
+
+      .week-name {
+        font-size: 24px;
+      }
+
+      .week-progress-value {
+        font-size: 30px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+        background-size: 180% 180%;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nav-tabs {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .nav-tab {
+        flex: 1;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 14px;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .week-stats {
+        font-size: 15px;
+      }
+
+      .week-tagline {
+        font-size: 14px;
+      }
+
+      .bar-chart {
+        height: 100px;
+      }
+
+      .scratch-add-row {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        grid-auto-rows: auto;
+      }
+
+      #scratchTaskText {
+        grid-column: 1 / -1;
+      }
+
+      #scratchStartTime {
+        grid-column: 1 / 2;
+      }
+
+      #scratchEndTime {
+        grid-column: 2 / 3;
+      }
+
+      .scratch-alarm-label {
+        grid-column: 1 / 2;
+      }
+
+      .scratch-add-row .btn {
+        grid-column: 2 / 3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-view="homeView">Home</button>
+        <button class="nav-tab" data-view="historyView">History</button>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" id="importBtn">Import</button>
+        <button class="btn" id="exportBtn">Export</button>
+        <input type="file" id="importFileInput" accept="application/json" style="display:none" />
+      </div>
+    </header>
+
+    <main>
+      <!-- Home -->
+      <section id="homeView" class="view active">
+        <div class="home-grid">
+          <!-- Day card -->
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title" id="dayTitle">Monday</div>
+                <div class="card-subtitle" id="dayWeekSubtitle">Week 1</div>
+              </div>
+              <div class="edit-pill">✏️</div>
+            </div>
+
+            <div class="day-tabs" id="dayTabs"></div>
+
+            <ul id="taskList" class="task-list"></ul>
+
+            <form id="addTaskForm" class="add-task-row">
+              <input
+                id="newTaskInput"
+                type="text"
+                placeholder="Add a task for this day"
+                required
+              />
+              <button type="submit" class="btn">Add</button>
+            </form>
+
+            <button type="button" id="copyYesterdayBtn" class="yesterday-btn">
+              ‹ Copy yesterday's tasks into today
+            </button>
+          </article>
+
+          <!-- Week card -->
+          <article class="card">
+            <div class="week-top-line">
+              <div>
+                <div class="week-name" id="userNameHeading">Your Name</div>
+                <div class="week-subheading" id="weekSubheading">
+                  This week's progress
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div class="week-progress-label">Progress</div>
+                <div class="week-progress-value" id="weekProgressValue">
+                  0%
+                </div>
+              </div>
+            </div>
+
+            <div class="week-stats" id="weekStatsText">
+              Total task: 0
+            </div>
+            <div class="week-stats" id="weekCompletedText">
+              Completed task: 0
+            </div>
+            <div class="week-tagline" id="weekTagline">
+              Lets get things done 😎
+            </div>
+
+            <div class="week-chart-wrapper">
+              <div class="week-chart-header">
+                <span id="weekChartTitle">Week 1</span>
+                <span id="weekChartPercentLabels">0% each day</span>
+              </div>
+              <div class="bar-chart" id="weekBarChart"></div>
+              <div class="legend">
+                <div class="legend-item">
+                  <span class="legend-dot completed"></span> Completed
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot pending"></span> Pending
+                </div>
+              </div>
+
+              <div class="week-nav">
+                <button type="button" id="prevWeekBtn">‹</button>
+                <span id="weekNavLabel">Week 1</span>
+                <button type="button" id="nextWeekBtn">›</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Scratch tasks card -->
+          <article class="card card-wide" id="scratchCard">
+            <div class="scratch-header">
+              <div>
+                <div class="scratch-title">Quick tasks</div>
+                <div class="scratch-subtitle">
+                  Temporary list, separate from weekly stats
+                </div>
+              </div>
+              <div class="scratch-progress-summary">
+                <span id="scratchProgressPercent">0%</span>
+                <span id="scratchProgressText">0 of 0 done</span>
+              </div>
+            </div>
+
+            <div class="scratch-progress-bar">
+              <div class="scratch-progress-inner" id="scratchProgressInner"></div>
+            </div>
+
+            <ul id="scratchTaskList" class="task-list scratch-task-list"></ul>
+
+            <form id="scratchAddForm" class="scratch-add-row">
+              <input
+                id="scratchTaskText"
+                type="text"
+                placeholder="Quick task name"
+                autocomplete="off"
+                required
+              />
+              <input
+                id="scratchStartTime"
+                type="time"
+                title="Start time"
+              />
+              <input
+                id="scratchEndTime"
+                type="time"
+                title="End time"
+              />
+              <label class="scratch-alarm-label">
+                <input type="checkbox" id="scratchAlarmInput" />
+                Alarm
+              </label>
+              <button type="submit" class="btn">Add</button>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section id="historyView" class="view">
+        <div class="history-list" id="historyList"></div>
+      </section>
+    </main>
+  </div>
+<!-- Username Modal -->
+<div id="usernameModal" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+">
+  <div style="
+    background: white;
+    padding: 24px;
+    border-radius: 18px;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  ">
+    <h2 style="margin-bottom: 6px;">Welcome</h2>
+    <p style="margin-bottom: 14px; color: #666;">
+      Enter your name to start tracking
+    </p>
+
+    <input
+      id="usernameInput"
+      type="text"
+      placeholder="Your name"
+      style="
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid #ddd;
+        font-size: 15px;
+        outline: none;
+      "
+    />
+
+    <button
+      id="usernameSaveBtn"
+      class="btn"
+      style="margin-top: 14px; width: 100%; justify-content: center;"
+    >
+      Continue
+    </button>
+  </div>
+</div>
+
+  <script>
+    const STORAGE_KEY = "weeklyPlannerData_v1";
+
+    const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const FULL_DAY_NAMES = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+
+    const USER_NAME = "";
+
+    let appState = {
+      userName: USER_NAME,
+      weeks: {},
+    };
+
+    // Quick task list lives in memory, only saved in export JSON
+    let scratchTasks = [];
+
+    // drag state for reorder
+    let dragState = { type: null, id: null };
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.weks) {
+          appState = parsed;
+        } else if (parsed && parsed.weeks) {
+          appState = parsed;
+        }
+      } catch (e) {
+        console.error("Could not load data", e);
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    function getMonday(date) {
+      const d = new Date(date);
+      const day = d.getDay() || 7;
+      if (day !== 1) {
+        d.setDate(d.getDate() + 1 - day);
+      }
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function getISOWeekAndYear(date) {
+      const tmp = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+      );
+      const dayNum = tmp.getUTCDay() || 7;
+      tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+      const weekNo = Math.ceil(((tmp - yearStart) / 86400000 + 1) / 7);
+      const year = tmp.getUTCFullYear();
+      return { year, week: weekNo };
+    }
+
+    let currentWeekStart = getMonday(new Date());
+    let selectedDayIndex = (new Date().getDay() + 6) % 7;
+
+    function getOrCreateCurrentWeek() {
+      const { year, week } = getISOWeekAndYear(currentWeekStart);
+      const id = `${year}-W${week}`;
+      if (!appState.weeks[id]) {
+        appState.weeks[id] = {
+          id,
+          year,
+          week,
+          startDate: currentWeekStart.toISOString().slice(0, 10),
+          days: {},
+        };
+      }
+      return appState.weeks[id];
+    }
+
+    function shiftWeek(delta) {
+      const d = new Date(currentWeekStart);
+      d.setDate(d.getDate() + delta * 7);
+      currentWeekStart = getMonday(d);
+      renderAll();
+    }
+
+    function computeWeekStats(week) {
+      let totalTasks = 0;
+      let completed = 0;
+      const perDay = [];
+
+      for (let i = 0; i < 7; i++) {
+        const tasks = week.days[i] || [];
+        const dayTotal = tasks.length;
+        const dayCompleted = tasks.filter((t) => t.completed).length;
+        totalTasks += dayTotal;
+        completed += dayCompleted;
+        const percent =
+          dayTotal === 0 ? 0 : Math.round((dayCompleted / dayTotal) * 100);
+        perDay.push({ total: dayTotal, completed: dayCompleted, percent });
+      }
+
+      const progress =
+        totalTasks === 0
+          ? 0
+          : Math.round((completed / totalTasks) * 100);
+
+      return { totalTasks, completed, progress, perDay };
+    }
+
+    const dayTabsContainer = document.getElementById("dayTabs");
+    const dayTitleEl = document.getElementById("dayTitle");
+    const dayWeekSubtitleEl = document.getElementById("dayWeekSubtitle");
+    const taskListEl = document.getElementById("taskList");
+
+    const userNameHeading = document.getElementById("userNameHeading");
+    const weekSubheading = document.getElementById("weekSubheading");
+    const weekProgressValue = document.getElementById("weekProgressValue");
+    const weekStatsText = document.getElementById("weekStatsText");
+    const weekCompletedText = document.getElementById("weekCompletedText");
+    const weekTagline = document.getElementById("weekTagline");
+    const weekChartTitle = document.getElementById("weekChartTitle");
+    const weekChartPercentLabels = document.getElementById(
+      "weekChartPercentLabels"
+    );
+    const weekBarChart = document.getElementById("weekBarChart");
+    const weekNavLabel = document.getElementById("weekNavLabel");
+
+    const historyListEl = document.getElementById("historyList");
+
+    // scratch DOM
+    const scratchTaskListEl = document.getElementById("scratchTaskList");
+    const scratchProgressPercentEl = document.getElementById("scratchProgressPercent");
+    const scratchProgressTextEl = document.getElementById("scratchProgressText");
+    const scratchProgressInnerEl = document.getElementById("scratchProgressInner");
+
+    function renderDayTabs() {
+      dayTabsContainer.innerHTML = "";
+      DAY_LABELS.forEach((label, index) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = label;
+        btn.className =
+          "day-tab" + (index === selectedDayIndex ? " active" : "");
+        btn.addEventListener("click", () => {
+          selectedDayIndex = index;
+          renderAll();
+        });
+        dayTabsContainer.appendChild(btn);
+      });
+    }
+
+    function renderDayCard() {
+      const week = getOrCreateCurrentWeek();
+      const { week: weekNumber } = getISOWeekAndYear(currentWeekStart);
+
+      const tasks = week.days[selectedDayIndex] || [];
+
+      dayTitleEl.textContent = FULL_DAY_NAMES[selectedDayIndex];
+      dayWeekSubtitleEl.textContent = `Week ${weekNumber}`;
+
+      taskListEl.innerHTML = "";
+      tasks.forEach((task) => {
+        const li = document.createElement("li");
+        li.className = "task-item";
+        li.draggable = true;
+        li.dataset.taskId = task.id;
+        li.dataset.listType = "main";
+
+        li.addEventListener("dragstart", (e) => {
+          dragState = { type: "main", id: task.id };
+          e.dataTransfer.effectAllowed = "move";
+        });
+
+        li.addEventListener("dragover", (e) => {
+          if (dragState.type === "main") {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            li.classList.add("drag-over");
+          }
+        });
+
+        li.addEventListener("dragleave", () => {
+          li.classList.remove("drag-over");
+        });
+
+        li.addEventListener("drop", (e) => {
+          e.preventDefault();
+          li.classList.remove("drag-over");
+          if (dragState.type === "main" && dragState.id !== task.id) {
+            reorderMainTasks(dragState.id, task.id);
+          }
+          dragState = { type: null, id: null };
+        });
+
+        const main = document.createElement("div");
+        main.className = "task-main";
+
+        const circle = document.createElement("button");
+        circle.type = "button";
+        circle.className =
+          "task-checkbox" + (task.completed ? " checked" : "");
+        if (task.completed) {
+          circle.textContent = "✓";
+        }
+        circle.addEventListener("click", () => {
+          toggleTaskCompleted(task.id);
+        });
+
+        const text = document.createElement("span");
+        text.className =
+          "task-text" + (task.completed ? " completed" : "");
+        text.textContent = task.text;
+
+        main.appendChild(circle);
+        main.appendChild(text);
+
+        const actions = document.createElement("div");
+        actions.className = "task-actions";
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "task-edit";
+        editBtn.title = "Edit task";
+        editBtn.textContent = "✎";
+        editBtn.addEventListener("click", () => {
+          editTask(task.id);
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "task-delete";
+        delBtn.textContent = "✕";
+        delBtn.title = "Delete task";
+        delBtn.addEventListener("click", () => {
+          deleteTask(task.id);
+        });
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        li.appendChild(main);
+        li.appendChild(actions);
+
+        taskListEl.appendChild(li);
+      });
+    }
+
+    function renderWeekCard() {
+      const week = getOrCreateCurrentWeek();
+      const stats = computeWeekStats(week);
+      const { year, week: weekNumber } = getISOWeekAndYear(
+        currentWeekStart
+      );
+
+      userNameHeading.textContent = appState.userName || USER_NAME;
+      weekSubheading.textContent = `This week's progress`;
+      weekProgressValue.textContent = `${stats.progress}%`;
+      weekStatsText.textContent = `Total task: ${stats.totalTasks}`;
+      weekCompletedText.textContent = `Completed task: ${stats.completed}`;
+      weekTagline.textContent =
+        stats.completed === 0
+          ? "Lets get things done 😎"
+          : "Nice work, keep the streak going 💪";
+      weekChartTitle.textContent = `Week ${weekNumber} • ${year}`;
+      weekChartPercentLabels.textContent = `${stats.progress}% overall`;
+      weekNavLabel.textContent = `Week ${weekNumber} • ${year}`;
+
+      weekBarChart.innerHTML = "";
+      stats.perDay.forEach((dayStats, index) => {
+        const col = document.createElement("div");
+        col.className = "bar-column";
+
+        const topLabel = document.createElement("div");
+        topLabel.textContent = `${dayStats.percent}%`;
+
+        const bar = document.createElement("div");
+        bar.className = "bar";
+
+        const inner = document.createElement("div");
+        inner.className = "bar-inner";
+        inner.style.height = `${dayStats.percent}%`;
+
+        bar.appendChild(inner);
+
+        const label = document.createElement("div");
+        label.className = "bar-label";
+        label.textContent = DAY_LABELS[index];
+
+        col.appendChild(topLabel);
+        col.appendChild(bar);
+        col.appendChild(label);
+
+        weekBarChart.appendChild(col);
+      });
+    }
+
+    function renderHistoryView() {
+      historyListEl.innerHTML = "";
+
+      const weeks = Object.values(appState.weeks);
+      if (weeks.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent =
+          "No history yet. Create tasks for this week and they will appear here.";
+        empty.style.color = "#fff";
+        historyListEl.appendChild(empty);
+        return;
+      }
+
+      weeks.sort((a, b) =>
+        a.startDate < b.startDate ? 1 : -1
+      );
+
+      weeks.forEach((week) => {
+        const stats = computeWeekStats(week);
+
+        const wrap = document.createElement("article");
+        wrap.className = "card history-card";
+
+        const title = document.createElement("div");
+        title.className = "history-week-title";
+        title.textContent = `Week ${week.week} ${week.year}`;
+
+        const p = document.createElement("div");
+        p.className = "history-stats";
+        p.textContent = `Progress: ${stats.progress}%`;
+
+        const t1 = document.createElement("div");
+        t1.className = "history-stats";
+        t1.textContent = `Total task: ${stats.totalTasks}`;
+
+        const t2 = document.createElement("div");
+        t2.className = "history-stats";
+        t2.textContent = `Completed task: ${stats.completed}`;
+
+        const chartWrap = document.createElement("div");
+        chartWrap.className = "history-bar-chart";
+
+        const smallChart = document.createElement("div");
+        smallChart.className = "small-bar-chart";
+
+        stats.perDay.forEach((dayStats, index) => {
+          const col = document.createElement("div");
+          col.className = "small-bar-column";
+
+          const top = document.createElement("div");
+          top.textContent = `${dayStats.percent}%`;
+
+          const bar = document.createElement("div");
+          bar.className = "small-bar";
+
+          const inner = document.createElement("div");
+          inner.className = "small-bar-inner";
+          inner.style.height = `${dayStats.percent}%`;
+
+          bar.appendChild(inner);
+
+          const label = document.createElement("div");
+          label.className = "small-bar-label";
+          label.textContent = DAY_LABELS[index];
+
+          col.appendChild(top);
+          col.appendChild(bar);
+          col.appendChild(label);
+
+          smallChart.appendChild(col);
+        });
+
+        chartWrap.appendChild(smallChart);
+
+        wrap.appendChild(title);
+        wrap.appendChild(p);
+        wrap.appendChild(t1);
+        wrap.appendChild(t2);
+        wrap.appendChild(chartWrap);
+
+        historyListEl.appendChild(wrap);
+      });
+    }
+
+    // scratch rendering
+
+    function renderScratchTasks() {
+      const total = scratchTasks.length;
+      const completed = scratchTasks.filter((t) => t.completed).length;
+      const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      scratchProgressPercentEl.textContent = `${percent}%`;
+      scratchProgressTextEl.textContent = `${completed} of ${total} done`;
+      scratchProgressInnerEl.style.width = `${percent}%`;
+
+      scratchTaskListEl.innerHTML = "";
+
+      scratchTasks.forEach((task) => {
+        const li = document.createElement("li");
+        li.className = "task-item";
+        li.draggable = true;
+
+        li.addEventListener("dragstart", (e) => {
+          dragState = { type: "scratch", id: task.id };
+          e.dataTransfer.effectAllowed = "move";
+        });
+
+        li.addEventListener("dragover", (e) => {
+          if (dragState.type === "scratch") {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            li.classList.add("drag-over");
+          }
+        });
+
+        li.addEventListener("dragleave", () => {
+          li.classList.remove("drag-over");
+        });
+
+        li.addEventListener("drop", (e) => {
+          e.preventDefault();
+          li.classList.remove("drag-over");
+          if (dragState.type === "scratch" && dragState.id !== task.id) {
+            reorderScratchTasks(dragState.id, task.id);
+          }
+          dragState = { type: null, id: null };
+        });
+
+        const main = document.createElement("div");
+        main.className = "task-main";
+
+        const circle = document.createElement("button");
+        circle.type = "button";
+        circle.className =
+          "task-checkbox" + (task.completed ? " checked" : "");
+        if (task.completed) {
+          circle.textContent = "✓";
+        }
+        circle.addEventListener("click", () => {
+          toggleScratchCompleted(task.id);
+        });
+
+        const box = document.createElement("div");
+        box.className = "scratch-textbox";
+
+        const text = document.createElement("span");
+        text.className =
+          "task-text" + (task.completed ? " completed" : "");
+        text.textContent = task.text;
+
+        const meta = document.createElement("div");
+        meta.className = "scratch-meta";
+
+        const timeLabel = document.createElement("span");
+        const from = task.startTime || "";
+        const to = task.endTime || "";
+        if (from || to) {
+          timeLabel.textContent = `${from || "?"} - ${to || "?"}`;
+        } else {
+          timeLabel.textContent = "No time";
+        }
+
+        const alarmLabel = document.createElement("span");
+        alarmLabel.textContent = task.alarm ? "🔔 alarm on" : "🔕 alarm off";
+
+        meta.appendChild(timeLabel);
+        meta.appendChild(alarmLabel);
+
+        box.appendChild(text);
+        box.appendChild(meta);
+
+        main.appendChild(circle);
+        main.appendChild(box);
+
+        const actions = document.createElement("div");
+        actions.className = "task-actions";
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "task-edit";
+        editBtn.title = "Edit quick task";
+        editBtn.textContent = "✎";
+        editBtn.addEventListener("click", () => {
+          editScratchTask(task.id);
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "task-delete";
+        delBtn.textContent = "✕";
+        delBtn.title = "Delete quick task";
+        delBtn.addEventListener("click", () => {
+          deleteScratchTask(task.id);
+        });
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        li.appendChild(main);
+        li.appendChild(actions);
+
+        scratchTaskListEl.appendChild(li);
+      });
+    }
+
+    function renderAll() {
+      renderDayTabs();
+      renderDayCard();
+      renderWeekCard();
+      renderHistoryView();
+      renderScratchTasks();
+    }
+
+    // main tasks
+
+    function getDayTasksForCurrentWeek(index) {
+      const week = getOrCreateCurrentWeek();
+      if (!week.days[index]) week.days[index] = [];
+      return week.days[index];
+    }
+
+    function addTask(text) {
+      const tasks = getDayTasksForCurrentWeek(selectedDayIndex);
+      const task = {
+        id: Date.now() + Math.random().toString(16).slice(2),
+        text,
+        completed: false,
+      };
+      tasks.push(task);
+      saveData();
+      renderAll();
+    }
+
+    function toggleTaskCompleted(taskId) {
+      const week = getOrCreateCurrentWeek();
+      const tasks = week.days[selectedDayIndex] || [];
+      const t = tasks.find((task) => task.id === taskId);
+      if (t) {
+        t.completed = !t.completed;
+        saveData();
+        renderAll();
+      }
+    }
+
+    function deleteTask(taskId) {
+      const week = getOrCreateCurrentWeek();
+      const tasks = week.days[selectedDayIndex] || [];
+      const filtered = tasks.filter((task) => task.id !== taskId);
+      week.days[selectedDayIndex] = filtered;
+      saveData();
+      renderAll();
+    }
+
+    function editTask(taskId) {
+      const week = getOrCreateCurrentWeek();
+      const tasks = week.days[selectedDayIndex] || [];
+      const t = tasks.find((task) => task.id === taskId);
+      if (!t) return;
+      const newText = window.prompt("Edit task", t.text);
+      if (newText === null) return;
+      const trimmed = newText.trim();
+      if (!trimmed) return;
+      t.text = trimmed;
+      saveData();
+      renderAll();
+    }
+
+    function copyYesterdayTasks() {
+      const week = getOrCreateCurrentWeek();
+      const todayIndex = selectedDayIndex;
+      if (todayIndex === 0) {
+        alert("Monday has no previous day in this week.");
+        return;
+      }
+      const yesterdayIndex = todayIndex - 1;
+      const yesterdayTasks = (week.days[yesterdayIndex] || []).map(
+        (t) => ({
+          id:
+            Date.now() +
+            Math.random().toString(16).slice(2),
+          text: t.text,
+          completed: false,
+        })
+      );
+      const todayTasks = getDayTasksForCurrentWeek(todayIndex);
+      week.days[todayIndex] = todayTasks.concat(yesterdayTasks);
+      saveData();
+      renderAll();
+    }
+
+    function reorderMainTasks(dragId, targetId) {
+      const week = getOrCreateCurrentWeek();
+      const tasks = week.days[selectedDayIndex] || [];
+      const fromIndex = tasks.findIndex((t) => t.id === dragId);
+      if (fromIndex === -1) return;
+      const [moved] = tasks.splice(fromIndex, 1);
+      if (!targetId) {
+        tasks.push(moved);
+      } else {
+        const toIndex = tasks.findIndex((t) => t.id === targetId);
+        if (toIndex === -1) {
+          tasks.push(moved);
+        } else {
+          tasks.splice(toIndex, 0, moved);
+        }
+      }
+      week.days[selectedDayIndex] = tasks;
+      saveData();
+      renderAll();
+    }
+
+    // scratch actions
+
+    function addScratchTask(text, startTime, endTime, alarm) {
+      const task = {
+        id: Date.now() + Math.random().toString(16).slice(2),
+        text,
+        startTime: startTime || "",
+        endTime: endTime || "",
+        alarm: !!alarm,
+        completed: false,
+      };
+      scratchTasks.push(task);
+      renderScratchTasks();
+    }
+
+    function toggleScratchCompleted(id) {
+      const t = scratchTasks.find((task) => task.id === id);
+      if (t) {
+        t.completed = !t.completed;
+        renderScratchTasks();
+      }
+    }
+
+    function deleteScratchTask(id) {
+      scratchTasks = scratchTasks.filter((t) => t.id !== id);
+      renderScratchTasks();
+    }
+
+    function editScratchTask(id) {
+      const t = scratchTasks.find((task) => task.id === id);
+      if (!t) return;
+
+      const newText = window.prompt("Edit quick task", t.text);
+      if (newText !== null && newText.trim()) {
+        t.text = newText.trim();
+      }
+
+      const newStart = window.prompt(
+        "Edit start time (HH:MM) or leave as is",
+        t.startTime || ""
+      );
+      if (newStart !== null) {
+        t.startTime = newStart.trim();
+      }
+
+      const newEnd = window.prompt(
+        "Edit end time (HH:MM) or leave as is",
+        t.endTime || ""
+      );
+      if (newEnd !== null) {
+        t.endTime = newEnd.trim();
+      }
+
+      const alarmStr = window.prompt(
+        "Alarm (on/off)",
+        t.alarm ? "on" : "off"
+      );
+      if (alarmStr !== null) {
+        const val = alarmStr.trim().toLowerCase();
+        if (val === "on" || val === "off") {
+          t.alarm = val === "on";
+        }
+      }
+
+      renderScratchTasks();
+    }
+
+    function reorderScratchTasks(dragId, targetId) {
+      const fromIndex = scratchTasks.findIndex((t) => t.id === dragId);
+      if (fromIndex === -1) return;
+      const [moved] = scratchTasks.splice(fromIndex, 1);
+      if (!targetId) {
+        scratchTasks.push(moved);
+      } else {
+        const toIndex = scratchTasks.findIndex((t) => t.id === targetId);
+        if (toIndex === -1) {
+          scratchTasks.push(moved);
+        } else {
+          scratchTasks.splice(toIndex, 0, moved);
+        }
+      }
+      renderScratchTasks();
+    }
+
+    // Export and import
+
+    const exportBtn = document.getElementById("exportBtn");
+    const importBtn = document.getElementById("importBtn");
+    const importFileInput = document.getElementById("importFileInput");
+
+    exportBtn.addEventListener("click", () => {
+      const data = JSON.stringify(
+        { appState, scratchTasks },
+        null,
+        2
+      );
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "weekly-planner-data.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener("click", () => {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+
+          if (imported.appState && imported.appState.weeks) {
+            appState = imported.appState;
+          } else if (imported.weeks) {
+            appState = imported;
+          } else {
+            alert("This does not look like planner data.");
+            return;
+          }
+
+          scratchTasks = imported.scratchTasks || [];
+
+          saveData();
+          currentWeekStart = getMonday(new Date());
+          selectedDayIndex = (new Date().getDay() + 6) % 7;
+          renderAll();
+          alert("Data imported.");
+        } catch (err) {
+          console.error(err);
+          alert("Could not read that file.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    });
+
+    // events
+
+    document
+      .getElementById("addTaskForm")
+      .addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = document.getElementById("newTaskInput");
+        const text = input.value.trim();
+        if (!text) return;
+        addTask(text);
+        input.value = "";
+        input.focus();
+      });
+
+    document
+      .getElementById("copyYesterdayBtn")
+      .addEventListener("click", copyYesterdayTasks);
+
+    document
+      .getElementById("prevWeekBtn")
+      .addEventListener("click", () => shiftWeek(-1));
+    document
+      .getElementById("nextWeekBtn")
+      .addEventListener("click", () => shiftWeek(1));
+
+    document.querySelectorAll(".nav-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const viewId = tab.dataset.view;
+        document
+          .querySelectorAll(".nav-tab")
+          .forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        document
+          .querySelectorAll(".view")
+          .forEach((view) => view.classList.remove("active"));
+        document.getElementById(viewId).classList.add("active");
+      });
+    });
+
+    // scratch form submit
+
+    document
+      .getElementById("scratchAddForm")
+      .addEventListener("submit", (event) => {
+        event.preventDefault();
+        const textInput = document.getElementById("scratchTaskText");
+        const startInput = document.getElementById("scratchStartTime");
+        const endInput = document.getElementById("scratchEndTime");
+        const alarmInput = document.getElementById("scratchAlarmInput");
+
+        const text = textInput.value.trim();
+        if (!text) return;
+
+        addScratchTask(text, startInput.value, endInput.value, alarmInput.checked);
+
+        textInput.value = "";
+        startInput.value = "";
+        endInput.value = "";
+        alarmInput.checked = false;
+        textInput.focus();
+      });
+
+    // init
+    // username setup
+
+const usernameModal = document.getElementById("usernameModal");
+const usernameInput = document.getElementById("usernameInput");
+const usernameSaveBtn = document.getElementById("usernameSaveBtn");
+
+function ensureUsername() {
+  if (!appState.userName || !appState.userName.trim()) {
+    usernameModal.style.display = "flex";
+    setTimeout(() => usernameInput.focus(), 0);
+  }
+}
+
+usernameSaveBtn.addEventListener("click", () => {
+  const name = usernameInput.value.trim();
+  if (!name) {
+    usernameInput.focus();
+    return;
+  }
+  appState.userName = name;
+  saveData();
+  usernameModal.style.display = "none";
+  renderAll();
+});
+
+usernameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    usernameSaveBtn.click();
+  }
+});
+
+    loadData();
+    ensureUsername();
+    renderAll();
+  </script>
+</body>
+</html>
